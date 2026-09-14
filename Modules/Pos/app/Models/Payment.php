@@ -6,7 +6,7 @@ namespace Modules\Pos\Models;
 
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
-use Illuminate\Database\Eloquent\Concerns\HasVersion7Uuids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,8 +14,8 @@ use Modules\Pos\Database\Factories\PaymentFactory;
 
 final class Payment extends Model
 {
-    use HasVersion7Uuids;
     use HasFactory;
+    use HasUuids;
 
     protected static function newFactory(): PaymentFactory
     {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Pos\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasVersion7Uuids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,8 +13,8 @@ use Modules\Pos\Database\Factories\ProductFactory;
 
 final class Product extends Model
 {
-    use HasVersion7Uuids;
     use HasFactory;
+    use HasUuids;
     use SoftDeletes;
 
     protected static function newFactory(): ProductFactory

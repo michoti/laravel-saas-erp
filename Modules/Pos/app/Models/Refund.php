@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Modules\Pos\Models;
 
 use App\Enums\RefundMethod;
-use Illuminate\Database\Eloquent\Concerns\HasVersion7Uuids;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class Refund extends Model
 {
-    use HasVersion7Uuids;
+    use HasUuids;
 
     public const UPDATED_AT = null; // refunds are immutable once processed
 
@@ -37,6 +38,6 @@ final class Refund extends Model
 
     public function processedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'processed_by_user_id');
+        return $this->belongsTo(User::class, 'processed_by_user_id');
     }
 }

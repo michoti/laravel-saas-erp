@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasVersion7Uuids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,7 +22,7 @@ final class User extends Authenticatable
     use HasApiTokens;
     use HasFactory;
     use HasRoles;
-    use HasVersion7Uuids;
+    use HasUuids;
     use Notifiable;
     use TwoFactorAuthenticatable;
 

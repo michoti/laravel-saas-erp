@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Modules\Pos\Models;
 
 use App\Enums\OrderStatus;
-use Illuminate\Database\Eloquent\Concerns\HasVersion7Uuids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Pos\Database\Factories\OrderFactory;
 
 final class Order extends Model
 {
-    use HasVersion7Uuids;
     use HasFactory;
+    use HasUuids;
 
     protected static function newFactory(): OrderFactory
     {
@@ -54,7 +55,7 @@ final class Order extends Model
         return $this->hasMany(Refund::class);
     }
 
-    public function customer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }

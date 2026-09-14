@@ -6,7 +6,7 @@ namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Concerns\HasVersion7Uuids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -24,7 +24,7 @@ final class PlatformAdminUser extends Authenticatable implements FilamentUser
 {
     use HasApiTokens;
     use HasFactory;
-    use HasVersion7Uuids;
+    use HasUuids;
     use Notifiable;
 
     protected $connection = 'central';
