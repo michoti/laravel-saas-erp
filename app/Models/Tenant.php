@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Concerns\HasSubscription;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
@@ -29,6 +30,16 @@ final class Tenant extends BaseTenant implements TenantWithDatabase
 
     protected $connection = 'central';
 
+    public static function getCustomColumns(): array
+    {
+        return [
+            ...parent::getCustomColumns(),
+            'name',
+            'billing_phone',
+            'theme',
+        ];
+    }
+
     protected function casts(): array
     {
         return [
@@ -43,7 +54,7 @@ final class Tenant extends BaseTenant implements TenantWithDatabase
 
     public function hasModuleEnabled(string $moduleKey): bool
     {
-        $enabledModules = \Illuminate\Support\Facades\Cache::remember(
+        $enabledModules = Cache::remember(
             "tenant:{$this->id}:modules",
             now()->addMinutes(15),
             fn () => $this->modules()->whereNotNull('enabled_at')->pluck('module_key')->all()

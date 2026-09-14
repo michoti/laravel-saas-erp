@@ -6,7 +6,7 @@ namespace Modules\Pos\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use Modules\Pos\App\Models\Order;
+use Modules\Pos\Models\App\Order;
 
 /** @extends Factory<Order> */
 final class OrderFactory extends Factory

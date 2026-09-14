@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
 
-            $table->enum('promotion_discount_type', ['percentage', 'fixed_amount'])->default('percentage');
+            $table->enum('discount_type', ['percentage', 'fixed_amount'])->default('percentage');
             $table->decimal('discount_value', 10, 2); // percentage (0-100) or a fixed KES amount, per discount_type
 
             // NULL = storewide. Set to scope the promotion to one product;

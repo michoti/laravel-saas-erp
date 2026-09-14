@@ -12,10 +12,10 @@ use Modules\Pos\Database\Seeders\PosPermissionSeeder;
 use Modules\Pos\Database\Seeders\PosRoleSeeder;
 use Modules\Pos\DataTransferObjects\CartLineData;
 use Modules\Pos\DataTransferObjects\PaymentLineData;
-use Modules\Pos\Models\Customer;
-use Modules\Pos\Models\Product;
-use Modules\Pos\Models\Promotion;
-use Modules\Pos\Models\StockLedgerEntry;
+use Modules\Pos\App\Models\Customer;
+use Modules\Pos\App\Models\Product;
+use Modules\Pos\App\Models\Promotion;
+use Modules\Pos\App\Models\StockLedgerEntry;
 use Modules\Pos\Services\PosCheckoutService;
 
 /**

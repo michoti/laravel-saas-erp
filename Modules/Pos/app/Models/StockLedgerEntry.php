@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Pos\Models;
+namespace Modules\Pos\App\Models;
 
 use App\Enums\StockMovementType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;

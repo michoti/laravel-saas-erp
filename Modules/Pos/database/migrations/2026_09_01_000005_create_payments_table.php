@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreign('order_id')->references('id')->on('orders')
                 ->cascadeOnUpdate()->cascadeOnDelete();
 
-            $table->enum('payment_method', ['cash', 'mpesa', 'card', 'other'])->default('cash');
-            $table->enum('payment_status', ['pending', 'awaiting_confirmation', 'completed', 'failed', 'reversed'])->default('pending');
+            $table->enum('method', ['cash', 'mpesa', 'card', 'other'])->default('cash');
+            $table->enum('status', ['pending', 'awaiting_confirmation', 'completed', 'failed', 'reversed'])->default('pending');
 
             $table->decimal('amount', 14, 2);
             $table->string('currency', 3)->default('KES');
@@ -48,15 +48,15 @@ return new class extends Migration
 
             $table->timestampsTz();
 
-            $table->index(['payment_status']);
-            $table->index(['payment_method']);
+            $table->index(['status']);
+            $table->index(['method']);
         });
     }
 
     public function down(): void
     {
         Schema::dropIfExists('payments');
-        DB::statement('DROP TYPE IF EXISTS payment_status');
-        DB::statement('DROP TYPE IF EXISTS payment_method');
+        DB::statement('DROP TYPE IF EXISTS status');
+        DB::statement('DROP TYPE IF EXISTS method');
     }
 };

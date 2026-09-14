@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->foreignId('plan_id')->constrained('plans')->restrictOnDelete();
 
-            $table->enum('subscription_status', ['trialing', 'active', 'past_due', 'canceled', 'unpaid'])->default('trialing');
+            $table->enum('status', ['trialing', 'active', 'past_due', 'canceled', 'unpaid'])->default('trialing');
 
             $table->timestampTz('trial_ends_at')->nullable();
             $table->timestampTz('current_period_start');
@@ -34,13 +34,13 @@ return new class extends Migration
             // plan changes go through SubscriptionService::swap(), which
             // updates this same row rather than creating a second one.
             $table->unique('tenant_id');
-            $table->index(['subscription_status', 'current_period_end']);
+            $table->index(['status', 'current_period_end']);
         });
     }
 
     public function down(): void
     {
         Schema::connection('central')->dropIfExists('subscriptions');
-        DB::connection('central')->statement('DROP TYPE IF EXISTS subscription_status');
+        DB::connection('central')->statement('DROP TYPE IF EXISTS status');
     }
 };

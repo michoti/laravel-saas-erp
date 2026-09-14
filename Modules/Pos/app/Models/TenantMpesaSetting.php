@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Pos\Models;
+namespace Modules\Pos\App\Models;
 
 use App\Services\Mpesa\MpesaCredentials;
 use Illuminate\Database\Eloquent\Model;

@@ -35,9 +35,15 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement(<<<'SQL'
-            CREATE TYPE stock_movement_type AS ENUM (
-                'sale', 'return', 'purchase', 'adjustment', 'transfer_in', 'transfer_out'
-            )
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'stock_movement_type') THEN
+                    CREATE TYPE stock_movement_type AS ENUM (
+                        'sale', 'return', 'purchase', 'adjustment', 'transfer_in', 'transfer_out'
+                    );
+                END IF;
+            END
+            $$
         SQL);
 
         DB::statement(<<<'SQL'
