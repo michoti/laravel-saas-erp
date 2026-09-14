@@ -11,13 +11,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("CREATE TYPE promotion_discount_type AS ENUM ('percentage', 'fixed_amount')");
 
         Schema::create('promotions', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('name');
 
-            $table->addColumn('promotion_discount_type', 'discount_type');
+            $table->enum('promotion_discount_type', ['percentage', 'fixed_amount'])->default('percentage');
             $table->decimal('discount_value', 10, 2); // percentage (0-100) or a fixed KES amount, per discount_type
 
             // NULL = storewide. Set to scope the promotion to one product;

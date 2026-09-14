@@ -11,9 +11,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement(<<<'SQL'
-            CREATE TYPE sync_batch_status AS ENUM ('queued', 'processing', 'processed', 'failed')
-        SQL);
 
         Schema::create('sync_batches', function (Blueprint $table): void {
             // Client-generated UUIDv7. The uniqueness of this key, submitted
@@ -22,7 +19,8 @@ return new class extends Migration
             $table->uuid('batch_id')->primary();
 
             $table->uuid('device_id')->index();
-            $table->addColumn('sync_batch_status', 'status')->default('queued');
+
+            $table->enum('sync_batch_status', ['queued', 'processing', 'processed', 'failed'])->default('queued');
 
             $table->unsignedSmallInteger('order_count')->default(0);
             $table->json('result_summary')->nullable();

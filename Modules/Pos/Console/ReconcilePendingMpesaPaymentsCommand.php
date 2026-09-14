@@ -6,8 +6,8 @@ namespace Modules\Pos\Console;
 
 use Illuminate\Console\Command;
 use Modules\Pos\Models\Payment;
-use Modules\Pos\Services\Mpesa\MpesaClient;
 use Modules\Pos\Services\Mpesa\MpesaPaymentResolver;
+use Modules\Pos\Services\Mpesa\PosMpesaGateway;
 
 /**
  * Automatic reconciliation for M-Pesa payments: Safaricom's callback is
@@ -28,7 +28,7 @@ final class ReconcilePendingMpesaPaymentsCommand extends Command
 
     protected $description = 'Actively query Daraja for any M-Pesa payment stuck awaiting a callback, and resolve or time it out.';
 
-    public function handle(MpesaClient $mpesa, MpesaPaymentResolver $resolver): int
+    public function handle(PosMpesaGateway $mpesa, MpesaPaymentResolver $resolver): int
     {
         $staleAfter = now()->subMinutes((int) config('mpesa.reconciliation.stale_after_minutes'));
         $giveUpAfter = now()->subMinutes((int) config('mpesa.reconciliation.give_up_after_minutes'));

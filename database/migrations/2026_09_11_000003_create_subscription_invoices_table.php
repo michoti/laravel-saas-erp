@@ -11,9 +11,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::connection('central')->statement(<<<'SQL'
-            CREATE TYPE subscription_invoice_status AS ENUM ('pending', 'awaiting_confirmation', 'paid', 'failed', 'void')
-        SQL);
 
         Schema::connection('central')->create('subscription_invoices', function (Blueprint $table): void {
             $table->id();
@@ -30,7 +27,7 @@ return new class extends Migration
             $table->string('currency', 3)->default('KES');
             $table->timestampTz('due_date');
 
-            $table->addColumn('subscription_invoice_status', 'status')->default('pending');
+            $table->enum('subscription_invoice_status', ['pending', 'awaiting_confirmation', 'paid', 'failed', 'void'])->default('pending');
 
             // Same idempotency mechanism as the POS `payments` table's
             // M-Pesa columns (see Modules/Pos/Database/Migrations/
@@ -52,7 +49,7 @@ return new class extends Migration
 
             $table->timestampsTz();
 
-            $table->index(['status', 'due_date']);
+            $table->index(['subscription_invoice_status', 'due_date']);
             $table->index(['tenant_id']);
             // Composite, not two separate single-column indexes: the
             // reconciliation sweep (see ReconcileSubscriptionPaymentsCommand)
@@ -61,7 +58,7 @@ return new class extends Migration
             // as under-indexed on the POS `payments` table in the prior
             // performance review. Fixed here from the start instead of
             // waiting to discover it again at scale.
-            $table->index(['status', 'stk_pushed_at']);
+            $table->index(['subscription_invoice_status', 'stk_pushed_at']);
         });
     }
 

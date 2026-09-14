@@ -17,12 +17,6 @@ return new class extends Migration
         // concurrent sync-batch processing across Horizon workers.
         DB::statement('CREATE SEQUENCE IF NOT EXISTS pos_invoice_number_seq START 1000');
 
-        DB::statement(<<<'SQL'
-            CREATE TYPE order_status AS ENUM (
-                'draft', 'awaiting_payment', 'paid', 'partially_refunded', 'refunded', 'voided'
-            )
-        SQL);
-
         Schema::create('orders', function (Blueprint $table): void {
             $table->uuid('id')->primary(); // UUIDv7, client-generated offline
 
@@ -39,7 +33,7 @@ return new class extends Migration
             $table->uuid('cashier_user_id')->nullable()->index();
             $table->uuid('warehouse_id')->nullable()->index();
 
-            $table->addColumn('order_status', 'status')->default('draft');
+            $table->enum('status', ['draft', 'awaiting_payment', 'paid', 'partially_refunded', 'refunded', 'voided'])->default('draft');
 
             $table->decimal('subtotal', 14, 2)->default(0);
             $table->decimal('tax_total', 14, 2)->default(0);
@@ -65,7 +59,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('orders');
-        DB::statement('DROP TYPE IF EXISTS order_status');
         DB::statement('DROP SEQUENCE IF EXISTS pos_invoice_number_seq');
     }
 };

@@ -11,7 +11,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("CREATE TYPE refund_method AS ENUM ('cash', 'mpesa_manual', 'store_credit')");
 
         Schema::create('refunds', function (Blueprint $table): void {
             $table->uuid('id')->primary();
@@ -23,7 +22,7 @@ return new class extends Migration
             $table->foreign('order_item_id')->references('id')->on('order_items')->nullOnDelete();
 
             $table->decimal('amount', 14, 2);
-            $table->addColumn('refund_method', 'method');
+            $table->enum('refund_method', ['cash', 'mpesa_manual', 'store_credit'])->default('cash');
             $table->text('reason')->nullable();
 
             $table->uuid('processed_by_user_id');

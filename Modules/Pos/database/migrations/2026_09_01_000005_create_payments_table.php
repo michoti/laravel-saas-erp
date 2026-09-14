@@ -11,15 +11,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement(<<<'SQL'
-            CREATE TYPE payment_method AS ENUM ('cash', 'mpesa', 'card', 'other')
-        SQL);
-
-        DB::statement(<<<'SQL'
-            CREATE TYPE payment_status AS ENUM (
-                'pending', 'awaiting_confirmation', 'completed', 'failed', 'reversed'
-            )
-        SQL);
 
         Schema::create('payments', function (Blueprint $table): void {
             $table->uuid('id')->primary(); // UUIDv7, client-generated offline
@@ -28,8 +19,8 @@ return new class extends Migration
             $table->foreign('order_id')->references('id')->on('orders')
                 ->cascadeOnUpdate()->cascadeOnDelete();
 
-            $table->addColumn('payment_method', 'method');
-            $table->addColumn('payment_status', 'status')->default('pending');
+            $table->enum('payment_method', ['cash', 'mpesa', 'card', 'other'])->default('cash');
+            $table->enum('payment_status', ['pending', 'awaiting_confirmation', 'completed', 'failed', 'reversed'])->default('pending');
 
             $table->decimal('amount', 14, 2);
             $table->string('currency', 3)->default('KES');
@@ -57,8 +48,8 @@ return new class extends Migration
 
             $table->timestampsTz();
 
-            $table->index(['status']);
-            $table->index(['method']);
+            $table->index(['payment_status']);
+            $table->index(['payment_method']);
         });
     }
 

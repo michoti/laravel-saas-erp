@@ -11,11 +11,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::connection('central')->statement(<<<'SQL'
-            CREATE TYPE subscription_status AS ENUM (
-                'trialing', 'active', 'past_due', 'canceled', 'unpaid'
-            )
-        SQL);
 
         Schema::connection('central')->create('subscriptions', function (Blueprint $table): void {
             $table->id();
@@ -25,7 +20,7 @@ return new class extends Migration
 
             $table->foreignId('plan_id')->constrained('plans')->restrictOnDelete();
 
-            $table->addColumn('subscription_status', 'status')->default('trialing');
+            $table->enum('subscription_status', ['trialing', 'active', 'past_due', 'canceled', 'unpaid'])->default('trialing');
 
             $table->timestampTz('trial_ends_at')->nullable();
             $table->timestampTz('current_period_start');
@@ -39,7 +34,7 @@ return new class extends Migration
             // plan changes go through SubscriptionService::swap(), which
             // updates this same row rather than creating a second one.
             $table->unique('tenant_id');
-            $table->index(['status', 'current_period_end']);
+            $table->index(['subscription_status', 'current_period_end']);
         });
     }
 
