@@ -6,12 +6,14 @@ namespace Modules\Pos\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Modules\Pos\App\Models\Order;
+use Modules\Pos\App\Models\OrderItem;
+use Modules\Pos\App\Models\Payment;
+use Modules\Pos\App\Models\Product;
+use Modules\Pos\App\Models\StockLedgerEntry;
 use Modules\Pos\Jobs\InitiateMpesaStkPushJob;
-use Modules\Pos\Models\Order;
-use Modules\Pos\Models\OrderItem;
-use Modules\Pos\Models\Payment;
-use Modules\Pos\Models\Product;
-use Modules\Pos\Models\StockLedgerEntry;
+use Modules\Pos\Models\Customer;
+use Modules\Pos\Models\StoreCreditLedgerEntry;
 
 /**
  * The in-person, staff-operated checkout path (POS Terminal). Distinct from
@@ -139,13 +141,13 @@ final class PosCheckoutService
     private function recordPayment(Order $order, array $line, ?string $customerId): Payment
     {
         if ($line['method'] === 'store_credit') {
-            $customer = \Modules\Pos\Models\Customer::findOrFail($customerId);
+            $customer = Customer::findOrFail($customerId);
 
             if ((float) $customer->store_credit_balance < (float) $line['amount']) {
                 throw new \RuntimeException('Customer does not have enough store credit for this payment line.');
             }
 
-            \Modules\Pos\Models\StoreCreditLedgerEntry::create([
+            StoreCreditLedgerEntry::create([
                 'id' => (string) Str::uuid7(),
                 'customer_id' => $customer->id,
                 'amount' => -$line['amount'],

@@ -7,15 +7,12 @@ namespace Database\Seeders;
 use App\Enums\PaymentMethod;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
-use Modules\Pos\Database\Seeders\PosPermissionSeeder;
-use Modules\Pos\Database\Seeders\PosRoleSeeder;
-use Modules\Pos\DataTransferObjects\CartLineData;
-use Modules\Pos\DataTransferObjects\PaymentLineData;
 use Modules\Pos\App\Models\Customer;
 use Modules\Pos\App\Models\Product;
 use Modules\Pos\App\Models\Promotion;
 use Modules\Pos\App\Models\StockLedgerEntry;
+use Modules\Pos\Database\Seeders\PosPermissionSeeder;
+use Modules\Pos\Database\Seeders\PosRoleSeeder;
 use Modules\Pos\Services\PosCheckoutService;
 
 /**
@@ -91,26 +88,28 @@ final class TenantDatabaseSeeder extends Seeder
             $lineProducts = $products->random(random_int(1, 4))->values();
             $total = 0.0;
 
-            $cartLines = $lineProducts->map(function (Product $p) use (&$total): CartLineData {
+            $cartLines = $lineProducts->map(function (Product $p) use (&$total): array {
                 $quantity = (float) random_int(1, 3);
                 $lineSubtotal = (float) $p->unit_price * $quantity;
                 $total += $lineSubtotal + round($lineSubtotal * (float) $p->tax_rate, 2);
 
-                return new CartLineData(productId: $p->id, quantity: $quantity, unitPrice: (float) $p->unit_price);
-            });
+                return [
+                    'product_id' => $p->id,
+                    'quantity' => $quantity,
+                    'unit_price' => (float) $p->unit_price,
+                ];
+            })->all();
 
             $method = fake()->randomElement([PaymentMethod::Cash, PaymentMethod::Cash, PaymentMethod::Mpesa]);
 
             try {
                 $checkoutService->checkout(
                     cartLines: $cartLines,
-                    paymentLines: collect([
-                        new PaymentLineData(
-                            method: $method,
-                            amount: round($total, 2),
-                            payerPhone: $method === PaymentMethod::Mpesa ? '254712345678' : null,
-                        ),
-                    ]),
+                    paymentLines: [[
+                        'method' => $method->value,
+                        'amount' => round($total, 2),
+                        'payer_phone' => $method === PaymentMethod::Mpesa ? '254712345678' : null,
+                    ]],
                     customerId: fake()->boolean(60) ? $customers->random()->id : null,
                     cashierUserId: fake()->randomElement($cashierIds),
                 );
