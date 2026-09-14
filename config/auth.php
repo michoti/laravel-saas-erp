@@ -42,6 +42,20 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+         'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+
+        // Central-only guard for the superadmin Filament panel. Resolves
+        // against the `central` connection explicitly (unlike `users`,
+        // which floats with whatever tenancy() has bound) since platform
+        // admins must always authenticate against the central database
+        // regardless of which domain the request happens to hit.
+        'platform_admin' => [
+            'driver' => 'session',
+            'provider' => 'platform_admins',
+        ],
     ],
 
     /*
@@ -65,6 +79,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'platform_admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\PlatformAdminUser::class,
         ],
 
         // 'users' => [

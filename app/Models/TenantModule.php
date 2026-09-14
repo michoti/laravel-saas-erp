@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class TenantModule extends Model
 {
+    protected $connection = 'central';
+
     protected $guarded = [];
 
     protected function casts(): array

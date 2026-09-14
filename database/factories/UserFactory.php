@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\User;
@@ -9,19 +11,18 @@ use Illuminate\Support\Str;
 
 /**
  * @extends Factory<User>
+ *
+ * Lives in the TENANT database — running this factory without an active
+ * tenancy context (e.g. from `php artisan tinker` on the central connection)
+ * will fail with "relation users does not exist", which is expected: see
+ * database/seeders/TenantDatabaseSeeder.php for the intended entry point.
  */
-class UserFactory extends Factory
+final class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected $model = User::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected static ?string $password = null;
+
     public function definition(): array
     {
         return [
@@ -33,13 +34,8 @@ class UserFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function unverified(): self
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn (): array => ['email_verified_at' => null]);
     }
 }

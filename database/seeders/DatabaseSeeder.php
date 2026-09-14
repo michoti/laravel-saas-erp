@@ -1,25 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
+/**
+ * Central-database seeder (`php artisan db:seed`). Tenant-database seeding
+ * is a SEPARATE step — see TenantDatabaseSeeder, run automatically for
+ * every tenant via `php artisan tenants:seed` (per the `seeder_parameters`
+ * in config/tenancy.php).
+ */
+final class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            PlatformAdminSeeder::class,
+            PlanSeeder::class,
+            TenantSeeder::class,
         ]);
     }
 }
