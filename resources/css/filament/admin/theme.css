@@ -1,0 +1,21 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/Central';
+@source '../../../../app/Providers/Filament';
+
+/* Corporate palette for the CENTRAL superadmin panel — a distinct, cooler
+ * indigo so platform staff can tell at a glance they're in /admin and not
+ * inside a tenant's own branded panel. */
+:root {
+    --primary-50: 238 242 255;
+    --primary-100: 224 231 255;
+    --primary-200: 199 210 254;
+    --primary-300: 165 180 252;
+    --primary-400: 129 140 248;
+    --primary-500: 99 102 241;
+    --primary-600: 79 70 229;
+    --primary-700: 67 56 202;
+    --primary-800: 55 48 163;
+    --primary-900: 49 46 129;
+    --primary-950: 30 27 75;
+}

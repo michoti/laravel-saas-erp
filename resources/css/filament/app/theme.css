@@ -1,0 +1,61 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+/*
+ * Tailwind v4 is CSS-first — there is no tailwind.config.js. @source tells
+ * Tailwind which files to scan for utility classes actually used, since
+ * this panel's PHP/Blade code lives outside the framework's own vendor
+ * tree. (Replaces the old `content: [...]` array + `@config` directive.)
+ */
+@source '../../../../app/Filament';
+@source '../../../../Modules/Pos/Filament';
+@source '../../../../Modules/Pos/Resources/views';
+@source '../../../../resources/views';
+
+/*
+ * Corporate color palette for the TENANT panel, replacing Filament's stock
+ * Amber/Indigo defaults. See app/Providers/Filament/AppPanelProvider.php,
+ * which additionally overrides this with the active tenant's own
+ * `theme.primary_color` when one is set, so a white-labeled tenant's
+ * branding always wins over this default.
+ */
+:root {
+    --primary-50: 239 246 255;
+    --primary-100: 219 234 254;
+    --primary-200: 191 219 254;
+    --primary-300: 147 197 253;
+    --primary-400: 96 165 250;
+    --primary-500: 59 130 246;
+    --primary-600: 37 99 235;
+    --primary-700: 29 78 216;
+    --primary-800: 30 64 175;
+    --primary-900: 30 58 138;
+    --primary-950: 23 37 84;
+}
+
+/*
+ * Dark mode: Filament's own components already respond to the `dark`
+ * class via its utility classes (bg-gray-900, ring-white/10, etc, as used
+ * throughout Modules/Pos/Resources/views/filament/pages/pos-terminal.blade.php).
+ * These rules cover the CUSTOM, non-Filament markup in that same view —
+ * the raw <select>/<input> elements and skeleton loaders — so dark mode
+ * stays visually consistent between native Filament components and our
+ * hand-built POS terminal UI instead of the browser's unstyled defaults
+ * leaking through in dark mode.
+ */
+.dark select.fi-select,
+.dark input.fi-input {
+    color-scheme: dark;
+}
+
+/* Skeleton loading shimmer used by the POS terminal's product-search state */
+@keyframes skeleton-shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+.animate-pulse {
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 100%);
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}

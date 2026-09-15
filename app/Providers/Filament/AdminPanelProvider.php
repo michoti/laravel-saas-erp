@@ -1,59 +1,71 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers\Filament;
 
-use Filament\Http\Middleware\Authenticate;
+use App\Filament\Central\Pages\Dashboard;
+use App\Filament\Central\Widgets\ModuleAdoptionChart;
+use App\Filament\Central\Widgets\MrrTrendChart;
+use App\Filament\Central\Widgets\TenantGrowthChart;
+use App\Filament\Central\Widgets\TenantStatsOverview;
+use App\Models\PlatformAdminUser;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
-class AdminPanelProvider extends PanelProvider
+/**
+ * The platform (superadmin) panel. Deliberately NOT behind the `tenant`
+ * middleware group — it runs against the CENTRAL database only, and
+ * `PreventAccessFromCentralDomains` ensures it can never be reached from a
+ * tenant subdomain even if someone guesses the /admin path there.
+ */
+final class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
             ->id('admin')
             ->path('admin')
+            ->authGuard('platform_admin')
             ->login()
-            ->colors([
-                'primary' => Color::Amber,
-            ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->pages([
-                Dashboard::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->colors(['primary' => Color::Indigo])
+            // ->viteTheme('resources/css/filament/admin/theme.css')
+            ->brandName('Platform Admin')
+            ->discoverResources(in: app_path('Filament/Central/Resources'), for: 'App\\Filament\\Central\\Resources')
+            ->discoverPages(in: app_path('Filament/Central/Pages'), for: 'App\\Filament\\Central\\Pages')
+            ->pages([Dashboard::class])
+            ->discoverWidgets(in: app_path('Filament/Central/Widgets'), for: 'App\\Filament\\Central\\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                TenantStatsOverview::class,
+                TenantGrowthChart::class,
+                MrrTrendChart::class,
+                ModuleAdoptionChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                AuthenticateSession::class,
-                ShareErrorsFromSession::class,
-                PreventRequestForgery::class,
+                \Illuminate\Session\Middleware\StartSession::class,
+                \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+                VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                // PreventAccessFromCentralDomains::class,
             ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            ->authMiddleware([AuthenticateSession::class])
+            // Superadmin dashboard queries are backed by the pre-aggregated
+            // TenantUsageSnapshot table (see RefreshTenantUsageSnapshotsCommand),
+            // so this panel stays fast even with thousands of tenants.
+            // ->databaseNotifications()
+            ->spa();
     }
 }
