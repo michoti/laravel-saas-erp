@@ -29,6 +29,8 @@ final class PlatformAdminUser extends Authenticatable implements FilamentUser
 
     protected $connection = 'central';
 
+    protected $table = 'platform_admin_users';
+
     protected $guarded = [];
 
     protected $hidden = ['password', 'remember_token'];
