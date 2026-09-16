@@ -33,7 +33,7 @@ final class MpesaSettings extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'M-Pesa Settings';
 
-    protected static string $view = 'pos::filament.pages.mpesa-settings';
+    protected string $view = 'pos::filament.pages.mpesa-settings';
 
     public ?array $data = [];
 

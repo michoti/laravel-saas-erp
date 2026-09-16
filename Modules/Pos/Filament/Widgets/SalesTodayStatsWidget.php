@@ -12,7 +12,7 @@ use Modules\Pos\Models\Order;
 
 final class SalesTodayStatsWidget extends BaseWidget
 {
-    protected static ?string $pollingInterval = '60s';
+    protected ?string $pollingInterval = '60s';
 
     protected function getStats(): array
     {

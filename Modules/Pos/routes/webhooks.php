@@ -1,9 +1,9 @@
 <?php
 
-// declare(strict_types=1);
+declare(strict_types=1);
 
-// use Illuminate\Support\Facades\Route;
-// use Modules\Pos\Http\Controllers\MpesaCallbackController;
+use Illuminate\Support\Facades\Route;
+use Modules\Pos\App\Http\Controllers\MpesaCallbackController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +17,6 @@
 | restriction is also applied at the infrastructure layer.
 */
 
-// Route::post('api/webhooks/mpesa/{tenant}/callback', [MpesaCallbackController::class, 'handle'])
-//     ->name('mpesa.callback')
-//     ->middleware(['throttle:120,1', 'mpesa.verify_source']);
+Route::post('api/webhooks/mpesa/{tenant}/callback', [MpesaCallbackController::class, 'handle'])
+    ->name('mpesa.callback')
+    ->middleware(['throttle:120,1', 'mpesa.verify_source']);

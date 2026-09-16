@@ -33,7 +33,7 @@ final class PosTerminal extends Page
 
     protected static ?int $navigationSort = 0;
 
-    protected static string $view = 'pos::filament.pages.pos-terminal';
+    protected string $view = 'pos::filament.pages.pos-terminal';
 
     // --- Cart state -------------------------------------------------
     public array $cart = [];

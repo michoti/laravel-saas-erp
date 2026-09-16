@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  */
 final class SalesTrendChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Sales trend (last 30 days)';
+    protected ?string $heading = 'Sales trend (last 30 days)';
 
     protected static ?int $sort = 2;
 

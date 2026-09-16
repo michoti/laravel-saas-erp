@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 final class TopProductsChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Top 10 products (last 30 days, by revenue)';
+    protected ?string $heading = 'Top 10 products (last 30 days, by revenue)';
 
     protected static ?int $sort = 3;
 

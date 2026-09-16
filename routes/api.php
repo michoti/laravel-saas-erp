@@ -28,6 +28,6 @@ Route::middleware(['auth:sanctum', 'tenant'])->get('/user', fn (Request $request
 | tenancy-resolution step at all. See SubscriptionMpesaCallbackController's
 | own docblock for why that absence is the point.
 */
-Route::post('api/webhooks/mpesa/billing/callback', [SubscriptionMpesaCallbackController::class, 'handle'])
+Route::post('webhooks/mpesa/billing/callback', [SubscriptionMpesaCallbackController::class, 'handle'])
     ->name('billing.mpesa.callback')
     ->middleware(['throttle:120,1', 'mpesa.verify_source']);

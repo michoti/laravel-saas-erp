@@ -6,11 +6,11 @@ namespace Modules\Pos\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Modules\Pos\Models\Order;
-use Modules\Pos\Models\OrderItem;
-use Modules\Pos\Models\Refund;
-use Modules\Pos\Models\StockLedgerEntry;
-use Modules\Pos\Models\StoreCreditLedgerEntry;
+use Modules\Pos\App\Models\Order;
+use Modules\Pos\App\Models\OrderItem;
+use Modules\Pos\App\Models\Refund;
+use Modules\Pos\App\Models\StockLedgerEntry;
+use Modules\Pos\App\Models\StoreCreditLedgerEntry;
 
 /**
  * Centralizes the "return / refund / store credit" workflow so it's
