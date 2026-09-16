@@ -34,10 +34,10 @@ final class TenantSeeder extends Seeder
             ],
         ]);
 
-        $tenant->domains()->create(['domain' => 'demo.app.localhost']);
+        $tenant->domains()->create(['domain' => 'demo.laravelsaas.test']);
         $subscriptions->subscribe($tenant, $growthPlan);
 
-        $this->command?->info("Demo tenant created: {$tenant->id} (domain: demo.app.localhost)");
+        $this->command?->info("Demo tenant created: {$tenant->id} (domain: demo.laravelsaas.test)");
         $this->command?->info('Run `php artisan tenants:seed` to populate its database with demo staff/products/orders.');
     }
 }
