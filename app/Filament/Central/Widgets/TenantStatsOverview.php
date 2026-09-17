@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Central\Widgets;
 
+use App\Enums\SubscriptionStatus;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\TenantUsageSnapshot;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -21,8 +23,13 @@ final class TenantStatsOverview extends BaseWidget
         // this widget re-querying on every superadmin page view.
         $stats = Cache::tags(['central-dashboard'])->remember('central:tenant-stats-overview', now()->addMinutes(30), function (): array {
             $totalTenants = Tenant::query()->count();
-            $activeTrials = Tenant::query()->whereNotNull('trial_ends_at')->where('trial_ends_at', '>=', now())->count();
+            //$activeTrials = Tenant::query()->whereNotNull('trial_ends_at')->where('trial_ends_at', '>=', now())->count();
 
+            $activeTrials = Subscription::query()
+                ->where('status', SubscriptionStatus::Trialing)
+                ->whereNotNull('trial_ends_at')
+                ->where('trial_ends_at', '>=', now())
+                ->count();
             $today = TenantUsageSnapshot::query()->whereDate('snapshot_date', now()->toDateString());
 
             return [
