@@ -24,7 +24,9 @@ return [
      * Only relevant if you're using the domain or subdomain identification middleware.
      */
     'central_domains' => [
-        env('CENTRAL_DOMAIN', 'app.localhost'),
+        env('CENTRAL_DOMAIN', 'laravelsaas.test'),
+        '127.0.0.1',
+        'localhost',
     ],
 
     /**
@@ -157,7 +159,7 @@ return [
     'redis' => [
         'prefix_base' => 'tenant', // Each key in Redis will be prepended by this prefix_base, followed by the tenant id.
         'prefixed_connections' => [ // Redis connections whose keys are prefixed, to separate one tenant's keys from another.
-            // 'default',
+             'default',
         ],
     ],
 
@@ -172,9 +174,9 @@ return [
     'features' => [
         // Stancl\Tenancy\Features\UserImpersonation::class,
         // Stancl\Tenancy\Features\TelescopeTags::class,
-        // Stancl\Tenancy\Features\UniversalRoutes::class,
+       Stancl\Tenancy\Features\UniversalRoutes::class,
         // Stancl\Tenancy\Features\TenantConfig::class, // https://tenancyforlaravel.com/docs/v3/features/tenant-config
-        // Stancl\Tenancy\Features\CrossDomainRedirect::class, // https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect
+       Stancl\Tenancy\Features\CrossDomainRedirect::class, // https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect
         // Stancl\Tenancy\Features\ViteBundler::class,
     ],
 
