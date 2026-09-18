@@ -86,7 +86,7 @@ final class AppPanelProvider extends PanelProvider
                 InitializeTenancyByDomain::class,
                 PreventAccessFromCentralDomains::class,
                 EnsureModuleIsEnabled::class.':pos',
-            ])
+            ], isPersistent: true)
             ->authMiddleware([AuthenticateSession::class])
             ->databaseNotifications()
             ->spa();
