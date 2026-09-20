@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Modules\Pos\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Reads from the pre-aggregated `pos_read_model_daily_sales_summary` table
@@ -25,11 +27,23 @@ final class SalesTrendChartWidget extends ChartWidget
     protected function getData(): array
     {
         $rows = Cache::remember('pos:dashboard:sales-trend-30d', now()->addMinutes(5), function (): array {
-            return DB::table('pos_read_model_daily_sales_summary')
-                ->where('sales_date', '>=', now()->subDays(30)->toDateString())
-                ->orderBy('sales_date')
-                ->pluck('gross_sales', 'sales_date')
-                ->all();
+            if (! Schema::hasTable('pos_read_model_daily_sales_summary')) {
+                return $this->fallbackSalesTrendRows();
+            }
+
+            try {
+                return DB::table('pos_read_model_daily_sales_summary')
+                    ->where('sales_date', '>=', now()->subDays(30)->toDateString())
+                    ->orderBy('sales_date')
+                    ->pluck('gross_sales', 'sales_date')
+                    ->all();
+            } catch (QueryException $e) {
+                if (! str_contains($e->getMessage(), 'pos_read_model_daily_sales_summary')) {
+                    throw $e;
+                }
+
+                return $this->fallbackSalesTrendRows();
+            }
         });
 
         return [
@@ -42,6 +56,18 @@ final class SalesTrendChartWidget extends ChartWidget
             ]],
             'labels' => array_keys($rows),
         ];
+    }
+
+    private function fallbackSalesTrendRows(): array
+    {
+        return DB::table('orders')
+            ->where('status', 'paid')
+            ->where('order_date', '>=', now()->subDays(30)->toDateTimeString())
+            ->selectRaw('DATE(order_date) AS sales_date, SUM(grand_total) AS gross_sales')
+            ->groupByRaw('DATE(order_date)')
+            ->orderBy('sales_date')
+            ->pluck('gross_sales', 'sales_date')
+            ->all();
     }
 
     protected function getType(): string

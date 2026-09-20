@@ -16,8 +16,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Pos\Filament\Resources\PromotionResource\Pages;
-use Modules\Pos\Models\Product;
-use Modules\Pos\Models\Promotion;
+use Modules\Pos\App\Models\Product;
+use Modules\Pos\App\Models\Promotion;
 
 /**
  * Automatic promotional pricing at the till: once created here, a

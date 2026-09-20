@@ -12,7 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Pos\Filament\Resources\CustomerResource\Pages;
-use Modules\Pos\Models\Customer;
+use Modules\Pos\App\Models\Customer;
 
 final class CustomerResource extends Resource
 {

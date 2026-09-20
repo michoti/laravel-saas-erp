@@ -8,7 +8,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Modules\Pos\Models\Payment;
+use Modules\Pos\App\Models\Payment;
 
 /**
  * Surfaces M-Pesa payments still awaiting the Daraja callback so staff can

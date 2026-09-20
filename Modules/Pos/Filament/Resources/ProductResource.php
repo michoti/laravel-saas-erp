@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Modules\Pos\Filament\Imports\ProductsImporter;
 use Modules\Pos\Filament\Resources\ProductResource\Pages;
-use Modules\Pos\Models\Product;
+use Modules\Pos\App\Models\Product;
 
 final class ProductResource extends Resource
 {
@@ -116,7 +116,7 @@ final class ProductResource extends Resource
                 TernaryFilter::make('is_active'),
                 Filter::make('low_stock')
                     ->label('Low stock (< 10)')
-                    ->query(fn (Builder $query): Builder => $query->having('stock_on_hand', '<', 10)),
+                    ->query(fn (Builder $query): Builder => $query->lowStock(10)),
             ])
             ->recordActions([
                 \Filament\Actions\EditAction::make()->color('warning'),

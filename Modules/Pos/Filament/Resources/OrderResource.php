@@ -17,7 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Pos\Filament\Resources\OrderResource\Pages;
-use Modules\Pos\Models\Order;
+use Modules\Pos\App\Models\Order;
 use Modules\Pos\Services\RefundService;
 
 final class OrderResource extends Resource

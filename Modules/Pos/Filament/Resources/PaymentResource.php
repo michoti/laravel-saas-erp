@@ -11,7 +11,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Pos\Filament\Resources\PaymentResource\Pages;
-use Modules\Pos\Models\Payment;
+use Modules\Pos\App\Models\Payment;
 
 final class PaymentResource extends Resource
 {

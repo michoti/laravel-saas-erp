@@ -8,7 +8,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Modules\Pos\Models\Product;
+use Modules\Pos\App\Models\Product;
 
 final class StockAlertsTableWidget extends BaseWidget
 {
@@ -22,13 +22,11 @@ final class StockAlertsTableWidget extends BaseWidget
     {
         return $table
             ->query(
-                // Same withSum trick as ProductResource — one query for the
-                // whole widget, `having()` filters in SQL rather than in PHP.
                 Product::query()
                     ->where('is_active', true)
                     ->where('track_inventory', true)
+                    ->lowStock(10)
                     ->withSum('stockLedgerEntries as stock_on_hand', 'quantity_delta')
-                    ->having('stock_on_hand', '<', 10)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('sku'),

@@ -11,7 +11,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Pos\Filament\Resources\StockLedgerResource\Pages;
-use Modules\Pos\Models\StockLedgerEntry;
+use Modules\Pos\App\Models\StockLedgerEntry;
 
 final class StockLedgerResource extends Resource
 {

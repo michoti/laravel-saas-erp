@@ -8,7 +8,7 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Modules\Pos\Models\Order;
+use Modules\Pos\App\Models\Order;
 
 final class SalesTodayStatsWidget extends BaseWidget
 {
