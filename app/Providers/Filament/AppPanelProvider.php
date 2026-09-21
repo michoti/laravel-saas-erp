@@ -88,7 +88,7 @@ final class AppPanelProvider extends PanelProvider
                 EnsureModuleIsEnabled::class.':pos',
             ], isPersistent: true)
             ->authMiddleware([AuthenticateSession::class])
-            ->databaseNotifications()
+            //->databaseNotifications()
             ->spa();
     }
 

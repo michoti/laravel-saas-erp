@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'home' => '/home',
+    'home' => '/app',
 
     /*
     |--------------------------------------------------------------------------
@@ -101,7 +101,7 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    'middleware' => ['web', 'tenant'],
 
     /*
     |--------------------------------------------------------------------------
@@ -117,7 +117,7 @@ return [
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
-        'passkeys' => 'passkeys',
+      //  'passkeys' => 'passkeys',
     ],
 
     /*
@@ -162,16 +162,16 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        //Features::registration(),
         // Features::resetPasswords(),
         // Features::emailVerification(),
-        // Features::updateProfileInformation(),
-        // Features::updatePasswords(),
-        // Features::twoFactorAuthentication([
-        //     'confirm' => true,
-        //     'confirmPassword' => true,
-        //     // 'window' => 0,
-        // ]),
+         Features::updateProfileInformation(),
+         Features::updatePasswords(),
+        Features::twoFactorAuthentication([
+            'confirm' => true,
+            'confirmPassword' => true,
+            // 'window' => 0,
+        ]),
         // Features::passkeys([
         //     'confirmPassword' => true,
         // ]),

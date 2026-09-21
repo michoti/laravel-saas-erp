@@ -17,7 +17,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -55,7 +55,7 @@ final class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 \Illuminate\Session\Middleware\StartSession::class,
                 \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
+                PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
@@ -65,7 +65,7 @@ final class AdminPanelProvider extends PanelProvider
             // Superadmin dashboard queries are backed by the pre-aggregated
             // TenantUsageSnapshot table (see RefreshTenantUsageSnapshotsCommand),
             // so this panel stays fast even with thousands of tenants.
-            // ->databaseNotifications()
+            ->databaseNotifications()
             ->spa();
     }
 }

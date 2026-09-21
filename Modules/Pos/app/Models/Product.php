@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Pos\App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -69,5 +70,13 @@ final class Product extends Model
     public function stockOnHand(): float
     {
         return (float) $this->stockLedgerEntries()->sum('quantity_delta');
+    }
+
+    public function scopeLowStock(Builder $query, int $threshold = 10): Builder
+    {
+        return $query->whereRaw(
+            'COALESCE((SELECT SUM(quantity_delta) FROM stock_ledger WHERE stock_ledger.product_id = products.id), 0) < ?',
+            [$threshold]
+        );
     }
 }

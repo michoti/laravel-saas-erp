@@ -31,7 +31,7 @@ final class PosServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // $this->loadMigrationsFrom(module_path($this->name, 'Database/Migrations'));
+        $this->loadMigrationsFrom(module_path($this->name, 'Database/Migrations'));
         $this->loadViewsFrom(module_path($this->name, 'Resources/views'), 'pos');
         $this->registerRoutes();
         $this->registerPolicies();
