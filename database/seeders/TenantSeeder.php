@@ -24,7 +24,7 @@ final class TenantSeeder extends Seeder
         $growthPlan = Plan::where('slug', 'growth')->firstOrFail();
 
         $tenant = Tenant::factory()->withPosEnabled()->create([
-            'id' => 'demo-retail-co',
+            'id' => 'demo-retail',
             'name' => 'Demo Retail Co',
             'billing_phone' => '254712345678',
             'theme' => [

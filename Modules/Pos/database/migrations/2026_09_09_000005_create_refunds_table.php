@@ -26,7 +26,6 @@ return new class extends Migration
             $table->text('reason')->nullable();
 
             $table->uuid('processed_by_user_id');
-            $table->foreign('processed_by_user_id')->references('id')->on('users')->restrictOnDelete();
 
             $table->timestampsTz();
         });
