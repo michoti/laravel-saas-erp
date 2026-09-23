@@ -7,7 +7,7 @@ namespace Modules\Pos\Filament\Imports;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Modules\Pos\Models\Product;
+use Modules\Pos\App\Models\Product;
 
 /**
  * Filament's import system is queued natively (each chunk of rows is

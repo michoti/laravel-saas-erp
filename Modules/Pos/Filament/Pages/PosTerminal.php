@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Cache;
 use Modules\Pos\DataTransferObjects\CartLineData;
 use Modules\Pos\DataTransferObjects\PaymentLineData;
 use Modules\Pos\Jobs\GenerateReceiptPdfJob;
-use Modules\Pos\Models\Customer;
-use Modules\Pos\Models\Order;
-use Modules\Pos\Models\Product;
+use Modules\Pos\App\Models\Customer;
+use Modules\Pos\App\Models\Order;
+use Modules\Pos\App\Models\Product;
 use Modules\Pos\Services\PosCheckoutService;
 
 /**

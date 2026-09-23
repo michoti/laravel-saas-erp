@@ -13,7 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
-use Modules\Pos\Models\TenantMpesaSetting;
+use Modules\Pos\App\Models\TenantMpesaSetting;
 
 /**
  * Where a store owner configures THEIR OWN M-Pesa Till/PayBill —
