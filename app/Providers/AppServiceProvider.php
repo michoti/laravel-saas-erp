@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -16,6 +17,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        if ($this->app->environment('local') && class_exists(\Laravel\Telescope\TelescopeServiceProvider::class)) {
+            $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
+            $this->app->register(\App\Providers\TelescopeServiceProvider::class);
+        }
         // Singleton, unlike Modules\Pos\Services\Mpesa\PosMpesaGateway
         // (bound fresh per resolution) — the platform's OWN billing
         // credentials don't change per tenant/request the way a tenant's
@@ -42,9 +47,9 @@ class AppServiceProvider extends ServiceProvider
 
         \Illuminate\Support\Facades\Gate::policy(\Spatie\Permission\Models\Role::class, \App\Policies\RolePolicy::class);
 
-        Livewire::setUpdateRoute(function ($handle, $path) {
-            return Route::post($path, $handle)
-                ->middleware([InitializeTenancyForLivewire::class, 'web']);
-        });
+        // Livewire::setUpdateRoute(function ($handle, $path) {
+        //     return Route::post($path, $handle)
+        //         ->middleware([InitializeTenancyForLivewire::class, 'web']);
+        // });
     }
 }

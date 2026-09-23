@@ -17,6 +17,8 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Pos\Filament\Pages\Dashboard;
 use Modules\Pos\Filament\Pages\MpesaSettings;
@@ -59,7 +61,7 @@ final class AppPanelProvider extends PanelProvider
             ->colors(['primary' => $theme['primary_color'] ?? Color::Amber])
             ->viteTheme('resources/css/filament/app/theme.css')
             ->brandName($theme['brand_name'] ?? 'POS')
-            ->brandLogo(filled($theme['logo_url'] ?? null) ? \Illuminate\Support\Facades\Storage::url($theme['logo_url']) : null)
+            ->brandLogo(filled($theme['logo_url'] ?? null) ? Storage::url($theme['logo_url']) : null)
             ->discoverResources(in: app_path('Filament/Tenant/Resources'), for: 'App\\Filament\\Tenant\\Resources')
             ->discoverResources(in: base_path('Modules/Pos/Filament/Resources'), for: 'Modules\\Pos\\Filament\\Resources')
             ->discoverWidgets(in: base_path('Modules/Pos/Filament/Widgets'), for: 'Modules\\Pos\\Filament\\Widgets')
@@ -88,7 +90,7 @@ final class AppPanelProvider extends PanelProvider
                 EnsureModuleIsEnabled::class.':pos',
             ], isPersistent: true)
             ->authMiddleware([AuthenticateSession::class])
-            //->databaseNotifications()
+            // ->databaseNotifications()
             ->spa();
     }
 
@@ -100,13 +102,17 @@ final class AppPanelProvider extends PanelProvider
      */
     private function currentTenantTheme(): array
     {
+        if (app()->runningInConsole()) {
+            return [];
+        }
+
         $host = request()?->getHost();
 
         if ($host === null) {
             return [];
         }
 
-        return \Illuminate\Support\Facades\Cache::remember(
+        return Cache::remember(
             "tenant-theme:{$host}",
             now()->addMinutes(15),
             fn () => Tenant::query()->whereHas('domains', fn ($q) => $q->where('domain', $host))->first()?->theme ?? []
