@@ -54,7 +54,8 @@ return [
     |
     */
 
-    'use' => 'default',
+    // 'use' => 'default',
+    'use' => 'horizon',
 
     /*
     |--------------------------------------------------------------------------
@@ -100,6 +101,7 @@ return [
         'redis:default' => 60,
         'redis:pos-sync' => 30,
         'redis:mpesa' => 30,
+        'redis:billing' => 60,
     ],
 
     /*
@@ -235,6 +237,18 @@ return [
             'tries' => 3,
             'timeout' => 60,
         ],
+
+          // Central-only subscription billing STK pushes — isolated from
+        // the tenant-facing `mpesa` supervisor above.
+        'supervisor-billing' => [
+            'connection' => 'billing',
+            'queue' => ['billing'],
+            'balance' => 'auto',
+            'minProcesses' => 1,
+            'maxProcesses' => 3,
+            'tries' => 3,
+            'timeout' => 60,
+        ],
     ],
 
     'environments' => [
@@ -242,12 +256,14 @@ return [
             'supervisor-default' => ['maxProcesses' => 10],
             'supervisor-pos-sync' => ['minProcesses' => 1, 'maxProcesses' => 1],
             'supervisor-mpesa' => ['maxProcesses' => 5],
-        ],
+            'supervisor-billing' => ['maxProcesses' => 3],
+        ],  
 
         'local' => [
             'supervisor-default' => ['maxProcesses' => 3],
             'supervisor-pos-sync' => ['minProcesses' => 1, 'maxProcesses' => 1],
             'supervisor-mpesa' => ['maxProcesses' => 2],
+            'supervisor-billing' => ['maxProcesses' => 1],
         ],
     ],
 
