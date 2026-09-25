@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Middleware\EnsureModuleIsEnabled;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Http\Request;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -41,9 +42,25 @@ return Application::configure(basePath: dirname(__DIR__))
             'module' => EnsureModuleIsEnabled::class,
             'mpesa.verify_source' => \App\Http\Middleware\VerifyMpesaWebhookSource::class,
         ]);
+
+        // '*' would trust the client-supplied X-Forwarded-For header from
+        // ANY source — which would let an attacker spoof their way past
+        // VerifyMpesaWebhookSource's IP allowlist simply by setting that
+        // header themselves. Trust only the actual proxy/load-balancer
+        // IPs in front of this app (set via TRUSTED_PROXIES), never a
+        // wildcard, for any deployment where an IP-based check matters.
+        $middleware->trustProxies(at: array_filter(explode(',', (string) env('TRUSTED_PROXIES', ''))));
+
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('horizon*')) {
+                return route('filament.admin.auth.login');
+            }
+            return route('filament.app.auth.login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
-        );
-    })->create();
+        $exceptions->dontReport([
+            \Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedException::class,
+        ]);
+    })
+    ->create();

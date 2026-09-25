@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'database'),
+    'default' => env('QUEUE_CONNECTION', 'redis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -35,34 +35,34 @@ return [
             'driver' => 'sync',
         ],
 
-        'database' => [
-            'driver' => 'database',
-            'connection' => env('DB_QUEUE_CONNECTION'),
-            'table' => env('DB_QUEUE_TABLE', 'jobs'),
-            'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
-            'after_commit' => false,
-        ],
+        // 'database' => [
+        //     'driver' => 'database',
+        //     'connection' => env('DB_QUEUE_CONNECTION'),
+        //     'table' => env('DB_QUEUE_TABLE', 'jobs'),
+        //     'queue' => env('DB_QUEUE', 'default'),
+        //     'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+        //     'after_commit' => false,
+        // ],
 
-        'beanstalkd' => [
-            'driver' => 'beanstalkd',
-            'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
-            'queue' => env('BEANSTALKD_QUEUE', 'default'),
-            'retry_after' => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
-            'block_for' => 0,
-            'after_commit' => false,
-        ],
+        // 'beanstalkd' => [
+        //     'driver' => 'beanstalkd',
+        //     'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
+        //     'queue' => env('BEANSTALKD_QUEUE', 'default'),
+        //     'retry_after' => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
+        //     'block_for' => 0,
+        //     'after_commit' => false,
+        // ],
 
-        'sqs' => [
-            'driver' => 'sqs',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
-            'queue' => env('SQS_QUEUE', 'default'),
-            'suffix' => env('SQS_SUFFIX'),
-            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-            'after_commit' => false,
-        ],
+        // 'sqs' => [
+        //     'driver' => 'sqs',
+        //     'key' => env('AWS_ACCESS_KEY_ID'),
+        //     'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        //     'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
+        //     'queue' => env('SQS_QUEUE', 'default'),
+        //     'suffix' => env('SQS_SUFFIX'),
+        //     'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+        //     'after_commit' => false,
+        // ],
 
         'redis' => [
             'driver' => 'redis',
@@ -70,7 +70,52 @@ return [
             'queue' => env('REDIS_QUEUE', 'default'),
             'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
             'block_for' => null,
-            'after_commit' => false,
+            'after_commit' => true,
+        ],
+
+        // Single-concurrency queue enforced in config/horizon.php below —
+        // see ARCHITECTURE.md §2 for why pos-sync must stay strictly
+        // sequential per tenant.
+        'pos-sync' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+            'queue' => env('HORIZON_POS_SYNC_QUEUE', 'pos-sync'),
+            'retry_after' => 120,
+            'block_for' => null,
+            'after_commit' => true,
+        ],
+
+        'mpesa' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+            'queue' => env('HORIZON_MPESA_QUEUE', 'mpesa'),
+            'retry_after' => 60,
+            'block_for' => null,
+            'after_commit' => true,
+        ],
+
+        // Reports/exports/PDF generation — deliberately isolated from
+        // pos-sync and mpesa so a slow export can never delay ledger
+        // processing or payment confirmations.
+        'exports' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+            'queue' => env('HORIZON_EXPORTS_QUEUE', 'exports'),
+            'retry_after' => 360,
+            'block_for' => null,
+            'after_commit' => true,
+        ],
+
+        // Subscription billing STK pushes — central-only work, isolated
+        // from the tenant-facing `mpesa` queue so a burst of renewal
+        // billing never competes with a customer paying at a till.
+        'billing' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+            'queue' => env('HORIZON_BILLING_QUEUE', 'billing'),
+            'retry_after' => 90,
+            'block_for' => null,
+            'after_commit' => true,
         ],
 
         'deferred' => [
@@ -103,7 +148,7 @@ return [
     */
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'database' => env('DB_CONNECTION', 'central'),
         'table' => 'job_batches',
     ],
 
@@ -122,7 +167,7 @@ return [
 
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'database' => env('DB_CONNECTION', 'central'),
         'table' => 'failed_jobs',
     ],
 
