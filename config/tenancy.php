@@ -196,7 +196,7 @@ return [
         '--force' => true, // This needs to be true to run migrations in production.
         '--path' => [
             database_path('migrations/tenant'),
-            base_path('Modules/Pos/database/migrations'),
+            base_path('Modules/Pos/Database/Migrations'),
         ],
         '--realpath' => true,
     ],

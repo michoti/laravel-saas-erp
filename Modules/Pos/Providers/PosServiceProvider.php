@@ -65,12 +65,12 @@ final class PosServiceProvider extends ServiceProvider
     {
         Route::middleware(['api', 'tenant', 'module:pos'])
             ->prefix('api/pos')
-            ->group(module_path($this->name, 'Routes/api.php'));
+            ->group(module_path($this->name, 'routes/api.php'));
 
         // Public M-Pesa webhook: no tenant middleware (tenant is resolved
         // from the payment row's owning connection inside the controller),
         // no Sanctum auth — gated by an IP-allowlist middleware instead.
         Route::middleware(['api'])
-            ->group(module_path($this->name, 'Routes/webhooks.php'));
+            ->group(module_path($this->name, 'routes/webhooks.php'));
     }
 }
