@@ -59,7 +59,7 @@ return [
          * Tenant database names are created like this:
          * prefix + tenant_id + suffix.
          */
-        'prefix' => 'tenant',
+        'prefix' => 'tenant_',
         'suffix' => '',
 
         /**
@@ -208,9 +208,4 @@ return [
         '--class' => 'TenantDatabaseSeeder', // root seeder class
         '--force' => true, // This needs to be true to seed tenant databases in production
     ],
-
-    // 'exempt_routes' => [
-    //     'telescope',
-    //     'telescope.*',
-    // ],
 ];

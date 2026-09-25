@@ -15,9 +15,9 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     {
         parent::boot();
 
-        // Horizon::routeSmsNotificationsTo('15556667777');
-        // Horizon::routeMailNotificationsTo('example@example.com');
-        // Horizon::routeSlackNotificationsTo('slack-webhook-url', '#channel');
+        Horizon::routeSmsNotificationsTo(config('services.horizon.alert_phone'));
+        Horizon::routeMailNotificationsTo(config('services.horizon.alert_email'));
+
     }
 
     /**
@@ -27,10 +27,12 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
      */
     protected function gate(): void
     {
-        Gate::define('viewHorizon', function ($user = null) {
-            return in_array(optional($user)->email, [
-                //
-            ]);
-        });
+        // Deliberately ignores the injected $user (resolved from Laravel's
+        // DEFAULT guard, which floats to whichever tenant's `users` table
+        // is currently bound — or no real tenant database at all, since
+        // /horizon sits outside the `tenant` middleware group entirely).
+        // Horizon is central platform infrastructure, so authorization
+        // must check the central `platform_admin` guard explicitly.
+        Gate::define('viewHorizon', fn (): bool => auth('platform_admin')->user()?->is_super_admin === true);
     }
 }
