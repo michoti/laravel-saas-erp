@@ -47,9 +47,5 @@ class AppServiceProvider extends ServiceProvider
 
         \Illuminate\Support\Facades\Gate::policy(\Spatie\Permission\Models\Role::class, \App\Policies\RolePolicy::class);
 
-        // Livewire::setUpdateRoute(function ($handle, $path) {
-        //     return Route::post($path, $handle)
-        //         ->middleware([InitializeTenancyForLivewire::class, 'web']);
-        // });
     }
 }

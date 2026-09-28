@@ -52,7 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: array_filter(explode(',', (string) env('TRUSTED_PROXIES', ''))));
 
         $middleware->redirectGuestsTo(function ($request) {
-            if ($request->is('horizon*')) {
+            if ($request->is('horizon*', 'telescope*')) {
                 return route('filament.admin.auth.login');
             }
             return route('filament.app.auth.login');

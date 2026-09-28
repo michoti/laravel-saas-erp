@@ -95,6 +95,7 @@ return [
 
     'middleware' => [
         'web',
+        'auth:platform_admin',
         Authorize::class,
     ],
 

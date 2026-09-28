@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\PlatformAdminUser;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
@@ -31,6 +32,16 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         });
     }
 
+    protected function authorization(): void
+    {
+        Telescope::auth(function ($request) {
+            $user = auth('platform_admin')->user();
+
+            return $user instanceof PlatformAdminUser
+                && $user->is_super_admin;
+        });
+    }
+
     /**
      * Prevent sensitive request details from being logged by Telescope.
      */
@@ -54,12 +65,12 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      *
      * This gate determines who can access Telescope in non-local environments.
      */
-    protected function gate(): void
-    {
-        Gate::define('viewTelescope', function (User $user) {
-            return in_array($user->email, [
-                'laravelsaas.test'
-            ]);
-        });
-    }
+    // protected function gate(): void
+    // {
+    //     Gate::define('viewTelescope', function (User $user) {
+    //         return in_array($user->email, [
+    //             'superadmin@platform.test'
+    //         ]);
+    //     });
+    // }
 }
