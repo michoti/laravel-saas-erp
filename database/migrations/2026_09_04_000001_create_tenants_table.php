@@ -11,21 +11,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::connection('central')->create('tenants', function (Blueprint $table): void {
-            $table->string('id')->primary(); // stancl/tenancy UUID tenant id, also the tenant DB suffix
+            $table->string('id')->primary(); // stancl/tenancy tenant id, also the tenant DB suffix
 
-            $table->string('name');
+            $table->string('name')->index();
 
-            // The phone number InitiateSubscriptionStkPushJob sends the
-            // renewal STK Push to. Deliberately just a phone number, not
-            // a stored card/payment-method token — there's nothing here
-            // for a database breach to expose beyond what's already
-            // public information about the tenant.
+            // Number InitiateSubscriptionStkPushJob sends the renewal STK Push to.
+            // Deliberately just a phone number, never a stored payment token.
             $table->string('billing_phone')->nullable();
 
-            // Frontend customization — injected by Filament at runtime.
-            $table->json('theme')->nullable(); // { primary_color, logo_url, font_family, custom_css }
+            // { primary_color, logo_url, font_family, custom_css } — injected by Filament at runtime.
+            $table->jsonb('theme')->nullable();
 
-            $table->json('data')->nullable(); // stancl/tenancy free-form tenant data column
+            // stancl/tenancy free-form tenant data column.
+            $table->jsonb('data')->nullable();
 
             $table->timestampsTz();
         });
