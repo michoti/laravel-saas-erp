@@ -7,19 +7,18 @@ namespace App\Models;
 use App\Concerns\HasSubscription;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 /**
- * Lives in the CENTRAL database only. Owns billing (via HasSubscription +
- * App\Services\Billing\SubscriptionService — no Laravel Cashier anywhere
- * in this codebase), the module activation registry, and the tenant's
- * Filament theme customization. The tenant's actual business data (POS,
- * CRM, Invoicing...) lives in a fully separate `tenant_<uuid>` Postgres
- * database — see config/tenancy.php.
+ * Lives in the CENTRAL database only (the base model already applies
+ * stancl's CentralConnection trait). Owns billing (HasSubscription +
+ * App\Services\Billing\SubscriptionService), the module activation registry
+ * and the tenant's Filament theme. Business data lives in the separate
+ * `tenant_<id>` database.
  */
 final class Tenant extends BaseTenant implements TenantWithDatabase
 {
@@ -28,23 +27,32 @@ final class Tenant extends BaseTenant implements TenantWithDatabase
     use HasFactory;
     use HasSubscription;
 
-    protected $connection = 'central';
-
+    /**
+     * Real columns on the `tenants` table. Anything NOT listed here is
+     * moved by stancl's VirtualColumn into the `data` JSON column.
+     *
+     * @return list<string>
+     */
     public static function getCustomColumns(): array
     {
         return [
-            ...parent::getCustomColumns(),
+            'id',
             'name',
             'billing_phone',
-            'theme',
+            'theme', // jsonb: { primary_color, logo_url, font_family, custom_css }
+            'created_at',
+            'updated_at',
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
-        return [
-            'theme' => 'array', // { primary_color, logo_url, font_family, custom_css }
-        ];
+        return array_merge(parent::casts(), [
+            'theme' => 'array',
+        ]);
     }
 
     public function modules(): HasMany
@@ -52,14 +60,32 @@ final class Tenant extends BaseTenant implements TenantWithDatabase
         return $this->hasMany(TenantModule::class);
     }
 
+    /**
+     * One domain per tenant (the oldest), safe to eager load for lists.
+     */
+    public function primaryDomain(): HasOne
+    {
+        return $this->hasOne(config('tenancy.domain_model'))->oldestOfMany();
+    }
+
+    /**
+     * Enabled module keys, memoized per model instance (one tiny indexed
+     * query per request). Deliberately not stored in the shared cache:
+     * with CacheTenancyBootstrapper active, a key written while tenancy is
+     * initialized cannot be busted from the central admin panel.
+     *
+     * @return list<string>
+     */
+    public function enabledModuleKeys(): array
+    {
+        return once(fn (): array => $this->modules()
+            ->whereNotNull('enabled_at')
+            ->pluck('module_key')
+            ->all());
+    }
+
     public function hasModuleEnabled(string $moduleKey): bool
     {
-        $enabledModules = Cache::remember(
-            "tenant:{$this->id}:modules",
-            now()->addMinutes(15),
-            fn () => $this->modules()->whereNotNull('enabled_at')->pluck('module_key')->all()
-        );
-
-        return in_array($moduleKey, $enabledModules, true);
+        return in_array($moduleKey, $this->enabledModuleKeys(), true);
     }
 }

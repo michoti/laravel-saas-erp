@@ -8,13 +8,10 @@ use App\Enums\SubscriptionInvoiceStatus;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 /**
- * Read-only billing history for a tenant — invoices are only ever
- * created/resolved by App\Services\Billing\SubscriptionService and the
- * M-Pesa resolver, never edited by hand here.
+ * Read-only billing history: invoices are only created/resolved by
+ * App\Services\Billing\SubscriptionService and the M-Pesa resolver.
  */
 final class SubscriptionInvoicesRelationManager extends RelationManager
 {
@@ -30,14 +27,25 @@ final class SubscriptionInvoicesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->columns([
-                TextColumn::make('due_date')->dateTime()->sortable(),
-                TextColumn::make('amount')->money('KES')->sortable(),
+                TextColumn::make('due_date')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('amount')
+                    ->money('KES')
+                    ->sortable(),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (SubscriptionInvoiceStatus $state): string => $state->color()),
-                TextColumn::make('mpesa_receipt_number')->label('M-Pesa receipt')->toggleable(),
-                TextColumn::make('paid_at')->dateTime()->toggleable(),
+                TextColumn::make('mpesa_receipt_number')
+                    ->label('M-Pesa receipt')
+                    ->toggleable(),
+                TextColumn::make('paid_at')
+                    ->dateTime()
+                    ->placeholder('—')
+                    ->toggleable(),
             ])
-            ->defaultSort('due_date', 'desc');
+            ->defaultSort('due_date', 'desc')
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(10);
     }
 }
