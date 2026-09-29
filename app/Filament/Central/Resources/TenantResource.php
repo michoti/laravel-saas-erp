@@ -25,6 +25,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use UnitEnum;
@@ -48,6 +49,24 @@ final class TenantResource extends Resource
         return parent::getEloquentQuery()
             ->withCount('modules')
             ->with(['primaryDomain', 'subscription.plan']);
+    }
+
+    /**
+     * Active plans only, in the configured display order. On edit, the
+     * tenant's current plan is always included even if it was retired, so
+     * the select never renders blank or fails validation.
+     *
+     * @return array<int, string>
+     */
+    private static function planOptions(int|string|null $currentPlanId = null): array
+    {
+        return Plan::query()
+            ->where('is_active', true)
+            ->when($currentPlanId, fn (Builder $query): Builder => $query->orWhere('id', $currentPlanId))
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
     public static function form(Schema $schema): Schema
@@ -80,7 +99,7 @@ final class TenantResource extends Resource
                         ->visibleOn('create'),
                     Select::make('plan_id')
                         ->label('Plan')
-                        ->options(fn (): array => Plan::query()->orderBy('name')->pluck('name', 'id')->all())
+                        ->options(fn (?Model $record): array => self::planOptions($record?->subscription?->plan_id))
                         ->required()
                         ->searchable()
                         ->native(false),
