@@ -214,6 +214,34 @@ return [
             'nice' => 0,
         ],
 
+        'supervisor-notifications-high' => [
+            'connection' => 'redis',
+            'queue' => ['notifications-high'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => (int) env('HORIZON_NOTIFICATIONS_HIGH_MAX_PROCESSES', 3),
+            'minProcesses' => 1,
+            'balanceMaxShift' => 1,
+            'balanceCooldown' => 3,
+            'tries' => 3,
+            'timeout' => 30,
+            'nice' => 0,
+        ],
+
+        'supervisor-notifications-default' => [
+            'connection' => 'redis',
+            'queue' => ['notifications-default'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => (int) env('HORIZON_NOTIFICATIONS_DEFAULT_MAX_PROCESSES', 2),
+            'minProcesses' => 1,
+            'balanceMaxShift' => 1,
+            'balanceCooldown' => 3,
+            'tries' => 3,
+            'timeout' => 60,
+            'nice' => 5,
+        ],
+
         // Exactly one worker process: pos-sync batches must be processed
         // strictly in arrival order per tenant to protect ledger integrity
         // (see ARCHITECTURE.md §2). Horizontal scale comes from running one
@@ -254,6 +282,8 @@ return [
     'environments' => [
         'production' => [
             'supervisor-default' => ['maxProcesses' => 10],
+            'supervisor-notifications-high' => ['minProcesses' => 1, 'maxProcesses' => 6],
+            'supervisor-notifications-default' => ['minProcesses' => 1, 'maxProcesses' => 3],
             'supervisor-pos-sync' => ['minProcesses' => 1, 'maxProcesses' => 1],
             'supervisor-mpesa' => ['maxProcesses' => 5],
             'supervisor-billing' => ['maxProcesses' => 3],
@@ -261,6 +291,8 @@ return [
 
         'local' => [
             'supervisor-default' => ['maxProcesses' => 3],
+            'supervisor-notifications-high' => ['maxProcesses' => 1],
+            'supervisor-notifications-default' => ['maxProcesses' => 1],
             'supervisor-pos-sync' => ['minProcesses' => 1, 'maxProcesses' => 1],
             'supervisor-mpesa' => ['maxProcesses' => 2],
             'supervisor-billing' => ['maxProcesses' => 1],
