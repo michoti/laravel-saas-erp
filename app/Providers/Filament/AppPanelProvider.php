@@ -13,6 +13,7 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -46,6 +47,17 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
  * one tenant's branding into another's on that worker. If deploying on
  * Octane, move this lookup into a render-time hook (e.g. a view composer
  * or Filament's `renderHook`) instead of panel-registration time.
+ *
+ * MIDDLEWARE ORDER: tenancy identification is listed FIRST in the
+ * `isPersistent: true` array, ahead of session/cookie middleware.
+ * TenancyServiceProvider::makeTenancyMiddlewareHighestPriority() reorders
+ * these to run first for normally-routed requests via Laravel's middleware
+ * priority system, but the login form (and every other Livewire action in
+ * this panel) posts to the shared Livewire update endpoint, which Filament
+ * runs its *persistent* middleware against directly — declared order, not
+ * priority-sorted order. If tenancy identification ran after StartSession
+ * here, a Livewire action could execute against the wrong database
+ * connection despite the priority config elsewhere. Keep this order.
  */
 final class AppPanelProvider extends PanelProvider
 {
@@ -58,6 +70,10 @@ final class AppPanelProvider extends PanelProvider
             ->path('app')
             ->authGuard('web')
             ->login()
+            // Filament's own profile page: lets the authenticated tenant
+            // user update their name/email and, with current-password
+            // confirmation, their password. No custom page needed.
+            ->profile()
             ->colors(['primary' => $theme['primary_color'] ?? Color::Amber])
             ->viteTheme('resources/css/filament/app/theme.css')
             ->brandName($theme['brand_name'] ?? 'POS')
@@ -78,19 +94,29 @@ final class AppPanelProvider extends PanelProvider
                 NavigationGroup::make('Administration'),
             ])
             ->middleware([
+                // Tenancy identification MUST run before anything that
+                // touches the database or session, on every request —
+                // including Livewire's shared update endpoint. See the
+                // class docblock above.
+                PreventAccessFromCentralDomains::class,
+                InitializeTenancyByDomain::class,
                 EncryptCookies::class,
+                AddQueuedCookiesToResponse::class,
                 StartSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                InitializeTenancyByDomain::class,
-                PreventAccessFromCentralDomains::class,
                 EnsureModuleIsEnabled::class.':pos',
             ], isPersistent: true)
             ->authMiddleware([AuthenticateSession::class])
-            // ->databaseNotifications()
+            // Powers the panel's notification bell for the `database`
+            // channel (see App\Notifications\TenantAwareNotification and
+            // LowStockAlert) — reads from THIS tenant's own `notifications`
+            // table (see the tenant-path create_notifications_table
+            // migration), never the central one PlatformAdminUser uses.
+            ->databaseNotifications()
             ->spa();
     }
 

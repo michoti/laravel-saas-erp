@@ -4,50 +4,48 @@ declare(strict_types=1);
 
 namespace App\Actions\Tenants;
 
-use App\Enums\SubscriptionStatus;
 use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\Tenant;
+use App\Services\Billing\SubscriptionService;
+use DomainException;
 
 /**
- * Single place where a superadmin picks a tenant's plan.
+ * Single place where a superadmin picks a tenant's plan. Delegates the
+ * actual period/status bookkeeping to SubscriptionService — the same
+ * service TenantSeeder and the self-serve signup flow use — instead of
+ * duplicating that logic here.
  *
- * NEW subscription: starts now and follows the plan's own terms, like a
- * self-serve signup would. With `trial_days > 0` it is `trialing`, the
- * trial ends after that many days and the first period ends with the trial;
- * with no trial it is `active` for one `billing_interval_days` period.
- *
- * EXISTING subscription: only `plan_id` is swapped. Period dates, status
- * and invoices are left alone so a superadmin edit never silently resets a
- * billing cycle. If SubscriptionService::swap() handles proration or
- * invoicing, call it from the `exists` branch instead.
+ * ASSUMPTION: SubscriptionService exposes `subscribe(Tenant, Plan): Subscription`
+ * for a tenant with no subscription yet, and `swap(Tenant, Plan): Subscription`
+ * for changing an existing one (referenced by name in the subscriptions
+ * migration's comment). Adjust the two calls below if the real signatures
+ * differ.
  */
 final class AssignTenantPlan
 {
-    public function handle(Tenant $tenant, int|string $planId): void
+    public function __construct(
+        private readonly SubscriptionService $subscriptions,
+    ) {}
+
+    public function handle(Tenant $tenant, int|string $planId): Subscription
     {
         $plan = Plan::query()->findOrFail($planId);
-        $subscription = $tenant->subscription()->firstOrNew([]);
+        $existing = $tenant->subscription;
 
-        if (! $subscription->exists) {
-            $now = now();
-
-            if ($plan->trial_days > 0) {
-                $trialEnd = $now->copy()->addDays($plan->trial_days);
-
-                $subscription->status = SubscriptionStatus::Trialing;
-                $subscription->trial_ends_at = $trialEnd;
-                $subscription->current_period_end = $trialEnd;
-            } else {
-                $subscription->status = SubscriptionStatus::Active;
-                $subscription->current_period_end = $now->copy()->addDays($plan->billing_interval_days);
-            }
-
-            $subscription->current_period_start = $now;
+        // Defense in depth: the Select on the form already restricts
+        // choices to active plans (plus the tenant's current one), but a
+        // tampered Livewire payload could still submit a retired plan id.
+        if (! $plan->is_active && $existing?->plan_id !== $plan->getKey()) {
+            throw new DomainException("Plan \"{$plan->name}\" is not active and cannot be assigned to a tenant.");
         }
 
-        $subscription->plan_id = $plan->getKey();
-        $subscription->save();
+        $subscription = $existing
+            ? $this->subscriptions->swap($tenant, $plan)
+            : $this->subscriptions->subscribe($tenant, $plan);
 
         $tenant->unsetRelation('subscription');
+
+        return $subscription;
     }
 }

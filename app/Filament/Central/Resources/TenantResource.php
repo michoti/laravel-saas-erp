@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 use UnitEnum;
 
 final class TenantResource extends Resource
@@ -97,12 +98,30 @@ final class TenantResource extends Resource
                             ),
                         ])
                         ->visibleOn('create'),
+                    TextInput::make('owner_email')
+                        ->label('Owner email')
+                        ->helperText('The first login created inside the tenant\'s own database, with the Owner role. A temporary password is generated and shown once after creation.')
+                        ->email()
+                        ->required()
+                        ->maxLength(255)
+                        ->visibleOn('create'),
                     Select::make('plan_id')
                         ->label('Plan')
                         ->options(fn (?Model $record): array => self::planOptions($record?->subscription?->plan_id))
                         ->required()
                         ->searchable()
-                        ->native(false),
+                        ->native(false)
+                        ->helperText('Only active plans can be assigned; a tenant already on a retired plan keeps it listed until changed.')
+                        ->rule(fn (?Model $record): Exists => Rule::exists(
+                            config('tenancy.database.central_connection', 'central') . '.plans',
+                            'id',
+                        )->where(function ($query) use ($record): void {
+                            $query->where('is_active', true);
+
+                            if ($record?->subscription?->plan_id !== null) {
+                                $query->orWhere('id', $record->subscription->plan_id);
+                            }
+                        })),
                 ]),
 
             Section::make('Branding (injected into the tenant Filament panel at runtime)')
